@@ -15,11 +15,6 @@
   function setPage(page) {
     currentPage.value = page;
   }
-
-    // let i = (currentPage * limit) - limit;
-    /**
-     * Реализовать метод срабатывающий при событии пагинации(переход между страницами)
-     */
 </script>
 
 <template>
