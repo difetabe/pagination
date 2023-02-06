@@ -1,5 +1,4 @@
 <script setup>
-  import getData from "./utils/randomData";
   import AppPagination from './components/AppPagination.vue';
   import {ref} from "vue";
 
