@@ -15,7 +15,7 @@
         </button>
       </li>
 
-      <li v-if="firstButtonIsShowend">
+      <li v-if="firstButtonIsShowed">
         <button
             class="pagination-link"
             @click="emitCurrentPage(1)"
@@ -45,7 +45,7 @@
         <span class="pagination-ellipsis">&hellip;</span>
       </li>
 
-      <li v-if="lastButtonIsShowend">
+      <li v-if="lastButtonIsShowed">
         <button
             class="pagination-link"
             @click="emitCurrentPage(pageQuantity)"
@@ -83,31 +83,19 @@
       default: 10,
       validator: (value) => {
         if (value <= 0) {
-          new Error("pageSize attribute must be greater than 0.")
+          new Error("itemsPerPage attribute must be greater than 0.")
         }
         return true;
       },
     },
     currentPage: {
       type: Number,
-      default: 1,
-      validator: (value) => {
-        if (value <= 0) {
-          new Error("currentPage attribute must be greater than 0.")
-        }
-        return true;
-      },
+      default: 1
     },
 
     maxPagesShown: {
       type: Number,
-      default: 5,
-      validator: (value) => {
-        if (value <= 2) {
-          new Error("maxPagesShown attribute must be greater than 2.")
-        }
-        return true;
-      },
+      default: 5
     }
   })
 
@@ -138,8 +126,8 @@
     };
   });
 
-  const firstButtonIsShowend = computed(() => paginate.value.pages.length < props.maxPagesShown);
-  const lastButtonIsShowend = computed(() => paginate.value.pages.length < props.maxPagesShown);
+  const firstButtonIsShowed = computed(() => !(pageQuantity.value <= props.maxPagesShown));
+  const lastButtonIsShowed = computed(() => !(pageQuantity.value <= props.maxPagesShown));
   const hiddenPagesInEnd = computed(() => paginate.value.pages.length < props.maxPagesShown && props.currentPage < (pageQuantity.value - props.maxPagesShown / 2));
   const hiddenPagesInStart = computed(() => paginate.value.pages.length < props.maxPagesShown && props.currentPage > props.maxPagesShown - Math.floor(props.maxPagesShown / 2));
 

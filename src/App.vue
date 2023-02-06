@@ -1,13 +1,7 @@
 <script setup>
   import getData from "./utils/randomData";
   import AppPagination from './components/AppPagination.vue';
-  import {computed, ref} from "vue";
-
-  const data = getData();
-
-  const dataSize = computed(() => {
-    return data.length;
-  });
+  import {ref} from "vue";
 
   const limit = 10;
   const currentPage = ref(1);
@@ -19,15 +13,9 @@
 
 <template>
   <main>
-    <div>
-<!--      <span-->
-<!--          v-for="el in data"-->
-<!--          :key="el"-->
-<!--      >{{ el }}</span>-->
-    </div>
     <AppPagination
         @set-current-page="setPage"
-        :itemsQuantity="50"
+        :itemsQuantity="100"
         :pageSize="limit"
         :currentPage="currentPage"
     />
