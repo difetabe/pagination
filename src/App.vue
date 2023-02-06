@@ -1,5 +1,5 @@
 <script setup>
-  import getData from "./components/randomData";
+  import getData from "./utils/randomData";
   import AppPagination from './components/AppPagination.vue';
   import {computed, ref} from "vue";
 
@@ -33,6 +33,3 @@
     />
   </main>
 </template>
-
-<style scoped>
-</style>
