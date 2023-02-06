@@ -15,6 +15,20 @@
         </button>
       </li>
 
+      <li v-if="firstButtonIsShowend">
+        <button
+            class="pagination-link"
+            @click="emitCurrentPage(1)"
+            :class="{'is-current': 1 === currentPage}"
+        >
+          {{ 1 }}
+        </button>
+      </li>
+
+      <li v-if="hiddenPagesInStart">
+        <span class="pagination-ellipsis">&hellip;</span>
+      </li>
+
       <li>
         <button
             class="pagination-link"
@@ -24,6 +38,20 @@
             :class="{'is-current': pageNumber === currentPage}"
         >
           {{ pageNumber }}
+        </button>
+      </li>
+
+      <li v-if="hiddenPagesInEnd">
+        <span class="pagination-ellipsis">&hellip;</span>
+      </li>
+
+      <li v-if="lastButtonIsShowend">
+        <button
+            class="pagination-link"
+            @click="emitCurrentPage(pageQuantity)"
+            :class="{'is-current': pageQuantity === currentPage}"
+        >
+          {{ pageQuantity }}
         </button>
       </li>
 
@@ -55,19 +83,31 @@
       default: 10,
       validator: (value) => {
         if (value <= 0) {
-          new Error("itemsPerPage attribute must be greater than 0.")
+          new Error("pageSize attribute must be greater than 0.")
         }
         return true;
       },
     },
     currentPage: {
       type: Number,
-      default: 1
+      default: 1,
+      validator: (value) => {
+        if (value <= 0) {
+          new Error("currentPage attribute must be greater than 0.")
+        }
+        return true;
+      },
     },
 
     maxPagesShown: {
       type: Number,
-      default: 5
+      default: 5,
+      validator: (value) => {
+        if (value <= 2) {
+          new Error("maxPagesShown attribute must be greater than 2.")
+        }
+        return true;
+      },
     }
   })
 
@@ -82,21 +122,26 @@
     let startPage;
 
     if (pageQuantity.value <= props.maxPagesShown) {
-      pages = Array.from({length: pageQuantity.value}, (el, i) => i);
+      pages = Array.from({length: pageQuantity.value}, (el, i) => i + 1);
     } else {
       if (props.currentPage <= props.maxPagesShown - Math.floor(props.maxPagesShown / 2)) {
-        startPage = 1;
+        startPage = 2;
       } else if (pageQuantity.value - props.currentPage <= Math.floor(props.maxPagesShown / 2)) {
-        startPage = pageQuantity.value - (props.maxPagesShown - 1);
+        startPage = pageQuantity.value - (props.maxPagesShown - 2);
       } else {
-        startPage = props.currentPage - Math.floor(props.maxPagesShown / 2);
+        startPage = props.currentPage + 1 - Math.floor(props.maxPagesShown / 2);
       }
-      pages = Array.from({length: props.maxPagesShown}, (v, i) => startPage + i);
+      pages = Array.from({length: props.maxPagesShown - 2}, (v, i) => startPage + i);
     }
     return {
       pages: pages,
     };
   });
+
+  const firstButtonIsShowend = computed(() => paginate.value.pages.length < props.maxPagesShown);
+  const lastButtonIsShowend = computed(() => paginate.value.pages.length < props.maxPagesShown);
+  const hiddenPagesInEnd = computed(() => paginate.value.pages.length < props.maxPagesShown && props.currentPage < (pageQuantity.value - props.maxPagesShown / 2));
+  const hiddenPagesInStart = computed(() => paginate.value.pages.length < props.maxPagesShown && props.currentPage > props.maxPagesShown - Math.floor(props.maxPagesShown / 2));
 
   function emitCurrentPage(page) {
     if (page === props.currentPage) return;

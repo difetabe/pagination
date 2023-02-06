@@ -20,14 +20,14 @@
 <template>
   <main>
     <div>
-      <span
-          v-for="el in data"
-          :key="el"
-      >{{ el }}</span>
+<!--      <span-->
+<!--          v-for="el in data"-->
+<!--          :key="el"-->
+<!--      >{{ el }}</span>-->
     </div>
     <AppPagination
         @set-current-page="setPage"
-        :itemsQuantity="dataSize"
+        :itemsQuantity="50"
         :pageSize="limit"
         :currentPage="currentPage"
     />
