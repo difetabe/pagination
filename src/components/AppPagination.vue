@@ -43,6 +43,7 @@
 </template>
 
 <script setup>
+
   import {computed} from "vue";
 
   const props = defineProps({
@@ -79,26 +80,20 @@
   const paginate = computed(() => {
     let pages;
     let startPage;
-    let endPage;
 
     if (pageQuantity.value <= props.maxPagesShown) {
       pages = Array.from({length: pageQuantity.value}, (el, i) => i);
     } else {
-      if (props.currentPage <= 3) {
+      if (props.currentPage <= props.maxPagesShown - Math.floor(props.maxPagesShown / 2)) {
         startPage = 1;
-        endPage = props.maxPagesShown;
-      } else if (pageQuantity.value - props.currentPage <= 2) {
-        startPage = pageQuantity.value - 4;
-        endPage = pageQuantity.value;
+      } else if (pageQuantity.value - props.currentPage <= Math.floor(props.maxPagesShown / 2)) {
+        startPage = pageQuantity.value - (props.maxPagesShown - 1);
       } else {
-        startPage = props.currentPage - 2;
-        endPage = props.currentPage + 2;
+        startPage = props.currentPage - Math.floor(props.maxPagesShown / 2);
       }
       pages = Array.from({length: props.maxPagesShown}, (v, i) => startPage + i);
     }
     return {
-      startPage: startPage,
-      endPage: endPage,
       pages: pages,
     };
   });
