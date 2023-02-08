@@ -14,9 +14,9 @@
   <main>
     <AppPagination
         @set-current-page="setPage"
-        :itemsQuantity="100"
-        :pageSize="limit"
-        :currentPage="currentPage"
+        :number-of-items="100"
+        :page-size="limit"
+        :current-page="currentPage"
     />
   </main>
 </template>
