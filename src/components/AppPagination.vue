@@ -1,6 +1,6 @@
 <template>
   <nav
-      v-if="correctPaging"
+      v-if="isVisible"
       class="pagination is-centered"
   >
     <ul class="pagination-list">
@@ -13,48 +13,19 @@
         >
           Назад
         </button>
-      </li>
 
-      <li v-if="firstButtonIsShowed">
+      </li>
+      <li v-for="page in pages">
+        <span v-if="page.isDots">&hellip;</span>
         <button
             class="pagination-link"
-            @click="emitCurrentPage(1)"
-            :class="{'is-current': 1 === currentPage}"
-        >
-          {{ 1 }}
+            v-else
+            :class="{'is-current': page.isSelected }"
+            @click="emitCurrentPage(page.label)"
+        > {{ page.label }}
         </button>
-      </li>
 
-      <li v-if="hiddenPagesInStart">
-        <span class="pagination-ellipsis">&hellip;</span>
       </li>
-
-      <li>
-        <button
-            class="pagination-link"
-            v-for="(pageNumber) in pages"
-            :key="pageNumber"
-            @click="emitCurrentPage(pageNumber)"
-            :class="{'is-current': pageNumber === currentPage}"
-        >
-          {{ pageNumber }}
-        </button>
-      </li>
-
-      <li v-if="hiddenPagesInEnd">
-        <span class="pagination-ellipsis">&hellip;</span>
-      </li>
-
-      <li v-if="lastButtonIsShowed">
-        <button
-            class="pagination-link"
-            @click="emitCurrentPage(numberOfPages)"
-            :class="{'is-current': numberOfPages === currentPage}"
-        >
-          {{ numberOfPages }}
-        </button>
-      </li>
-
       <li>
         <button
             data-test="next"
@@ -73,36 +44,22 @@
 <script setup>
 
   import {computed} from "vue";
+  import {Button} from "./AppPagination/Button";
 
   const props = defineProps({
     numberOfItems: {
       type: Number,
-      validator: (value) => {
-        if (value <= 0) {
-          new Error("itemsPerPage attribute must be greater than 0.")
-        }
-        return true;
-      },
+      validator: (value) => value >= 0,
     },
     pageSize: {
       type: Number,
       default: 10,
-      validator: (value) => {
-        if (value <= 0) {
-          new Error("itemsPerPage attribute must be greater than 0.")
-        }
-        return true;
-      },
+      validator: (value) => value > 0,
     },
     currentPage: {
       type: Number,
       default: 1,
-      validator: (value) => {
-        if (value <= 0) {
-          new Error("itemsPerPage attribute must be greater than 0.")
-        }
-        return true;
-      },
+      validator: (value) => value > 0,
     },
   })
 
@@ -113,43 +70,29 @@
     return Math.ceil(props.numberOfItems / props.pageSize);
   });
 
-  const pages = computed(() => {
-    const allPages = (start = 1) => Array.from({length: numberOfPages.value}, (el, i) => i + start);
-
-    if (numberOfPages.value <= maxPagesShown) {
-      return allPages();
-    }
-    if (props.currentPage < maxPagesShown - 2) {
-      return allPages(2).slice(0, 2);
-    }
-    if (props.currentPage === 3) {
-      return allPages(2).slice(0, 3);
-    }
-    if (numberOfPages.value - props.currentPage === 2) {
-      return allPages(numberOfPages.value - (maxPagesShown - 2)).slice(0, 3);
-    }
-    if (numberOfPages.value - props.currentPage < 2) {
-      return allPages(numberOfPages.value - (maxPagesShown - 2)).slice(1, 3);
-    } else {
-      return allPages(props.currentPage - 1).slice(0, 3);
-    }
-  });
-
-  const firstButtonIsShowed = computed(() => numberOfPages.value > maxPagesShown);
-  const lastButtonIsShowed = computed(() => numberOfPages.value > maxPagesShown);
-  const hiddenPagesInEnd = computed(() =>
-      pages.value.length < maxPagesShown
-      && props.currentPage < (numberOfPages.value - maxPagesShown / 2));
-  const hiddenPagesInStart = computed(() =>
-      pages.value.length < maxPagesShown
-      && props.currentPage > maxPagesShown - 2);
-
-  const correctPaging = computed(() =>
+  const isVisible = computed(() =>
       props.currentPage > 0
       && props.numberOfItems > 0
       && props.pageSize > 0
       && numberOfPages.value > 1
   )
+
+  const pages = computed(() => {
+    return makePagesBaseSequence(props.currentPage - 1, maxPagesShown)
+        .map(pageNumber => {
+          const isDots = isNaN(pageNumber);
+          // const callback = !isDots
+          //     ? () => emits('set-current-page', pageNumber)
+          //     : () => {
+          //     };
+
+          return new Button(
+              pageNumber,
+              props.currentPage === pageNumber,
+              isDots
+          )
+        })
+  })
 
   function emitCurrentPage(page) {
     if (page !== props.currentPage
@@ -159,6 +102,39 @@
     }
   }
 
+  function makePagesBaseSequence(offset, limit) {
+    const baseArr = [];
+    const centralButtons = [props.currentPage - 1, props.currentPage, props.currentPage + 1];
+
+    if (numberOfPages.value <= limit) {
+      return Array.from({length: numberOfPages.value}, (_, i) => i + 1);
+    }
+
+    if (props.currentPage <= 2) {
+      return [1, 2, 3, 'dots', numberOfPages.value]
+    }
+
+    baseArr.push(1);
+
+    if (offset > 2) {
+      baseArr.push('dots')
+    }
+
+    if (offset < numberOfPages.value - 2) {
+      baseArr.push(centralButtons)
+    }
+
+    if (offset < numberOfPages.value - 3) {
+      baseArr.push('dots')
+    }
+
+    if (offset > numberOfPages.value - 3) {
+      return [1, 'dots', numberOfPages.value - 2, numberOfPages.value - 1, numberOfPages.value];
+    }
+
+    baseArr.push(numberOfPages.value)
+    return baseArr.flat()
+  }
 </script>
 
 <style lang="scss">
